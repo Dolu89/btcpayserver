@@ -35,7 +35,7 @@ namespace BTCPayServer.Models.AppViewModels
 
         public CurrencyInfoData CurrencyInfo { get; set; }
 
-        public bool EnableShoppingCart { get; set; }
+        public string DefaultView { get; set; }
         public bool ShowCustomAmount { get; set; }
         public bool ShowDiscount { get; set; }
         public bool EnableTips { get; set; }

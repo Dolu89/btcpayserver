@@ -56,7 +56,7 @@ namespace BTCPayServer.Controllers
             {
                 Title = settings.Title,
                 Step = step.ToString(CultureInfo.InvariantCulture),
-                EnableShoppingCart = settings.EnableShoppingCart,
+                DefaultView = settings.DefaultView,
                 ShowCustomAmount = settings.ShowCustomAmount,
                 ShowDiscount = settings.ShowDiscount,
                 EnableTips = settings.EnableTips,
@@ -105,7 +105,7 @@ namespace BTCPayServer.Controllers
             if (app == null)
                 return NotFound();
             var settings = app.GetSettings<PointOfSaleSettings>();
-            if (string.IsNullOrEmpty(choiceKey) && !settings.ShowCustomAmount && !settings.EnableShoppingCart)
+            if (string.IsNullOrEmpty(choiceKey) && !settings.ShowCustomAmount && settings.DefaultView != "cart")
             {
                 return RedirectToAction(nameof(ViewPointOfSale), new { appId = appId });
             }
@@ -133,14 +133,14 @@ namespace BTCPayServer.Controllers
             }
             else
             {
-                if (!settings.ShowCustomAmount && !settings.EnableShoppingCart)
+                if (!settings.ShowCustomAmount && settings.DefaultView != "cart")
                     return NotFound();
                 price = amount;
                 title = settings.Title;
                 
                 //if cart IS enabled and we detect posdata that matches the cart system's, check inventory for the items
                 if (!string.IsNullOrEmpty(posData) && 
-                    settings.EnableShoppingCart && 
+                    settings.DefaultView == "cart" && 
                     AppService.TryParsePosCartItems(posData, out var cartItems))
                 {
                         

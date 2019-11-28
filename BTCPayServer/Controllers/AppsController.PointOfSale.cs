@@ -55,7 +55,7 @@ namespace BTCPayServer.Controllers
                     "  image: https://cdn.pixabay.com/photo/2016/09/16/11/24/darts-1673812__480.jpg\n" +
                     "  inventory: 5\n" +
                     "  custom: true";
-                EnableShoppingCart = false;
+                DefaultView = "static";
                 ShowCustomAmount = true;
                 ShowDiscount = true;
                 EnableTips = true;
@@ -63,7 +63,7 @@ namespace BTCPayServer.Controllers
             public string Title { get; set; }
             public string Currency { get; set; }
             public string Template { get; set; }
-            public bool EnableShoppingCart { get; set; }
+            public string DefaultView { get; set; }
             public bool ShowCustomAmount { get; set; }
             public bool ShowDiscount { get; set; }
             public bool EnableTips { get; set; }
@@ -103,7 +103,7 @@ namespace BTCPayServer.Controllers
                 Id = appId,
                 StoreId = app.StoreDataId,
                 Title = settings.Title,
-                EnableShoppingCart = settings.EnableShoppingCart,
+                DefaultView = settings.DefaultView,
                 ShowCustomAmount = settings.ShowCustomAmount,
                 ShowDiscount = settings.ShowDiscount,
                 EnableTips = settings.EnableTips,
@@ -182,7 +182,7 @@ namespace BTCPayServer.Controllers
             app.SetSettings(new PointOfSaleSettings()
             {
                 Title = vm.Title,
-                EnableShoppingCart = vm.EnableShoppingCart,
+                DefaultView = vm.DefaultView,
                 ShowCustomAmount = vm.ShowCustomAmount,
                 ShowDiscount = vm.ShowDiscount,
                 EnableTips = vm.EnableTips,
