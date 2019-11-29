@@ -33,7 +33,9 @@ addLoadEvent(function (ev) {
             return {
                 srvModel: window.srvModel,
                 products: window.srvModel.items,
-                searchBar: ''
+                searchBar: '',
+
+                basket: []
             };
         },
         computed: {
@@ -44,6 +46,28 @@ addLoadEvent(function (ev) {
                 else {
                     return this.products;
                 }
+            },
+            basketCount: function () {
+                return this.basket.length;
+            },
+            basketDisplay: function () {
+                var basketDisplay = [];
+
+                for (var i = 0; i < this.basket.length; i++) {
+                    var currentItem = this.basket[i];
+                    var index = basketDisplay.findIndex(p => p.id === currentItem.id);
+                    if (index === -1) {
+                        var newItem = JSON.parse(JSON.stringify(currentItem));
+                        newItem['qty'] = 1;
+                        basketDisplay.push(newItem);
+                    }
+                    else {
+                        basketDisplay[index]['qty'] += 1;
+                    }
+                }
+
+
+                return basketDisplay;
             }
         },
         methods: {
@@ -57,6 +81,27 @@ addLoadEvent(function (ev) {
                 else {
                     return 'Sold out';
                 }
+            },
+            addToBasket: function (product) {
+                this.basket.push(product);
+            },
+            removeFromBasket: function (product) {
+                var index = this.basket.findIndex(p => p.id === product.id);
+                this.basket.splice(index, 1);
+            },
+            removeItemFromBasket: function (productId) {
+                var indexesToRemove = [];
+                for (var i = 0; i < this.basket.length; i++) {
+                    if (this.basket[i].id === productId) {
+                        indexesToRemove.push(i);
+                    }
+                }
+                for (var y = indexesToRemove.length -1; y >= 0; y--) {
+                    this.basket.splice(indexesToRemove[y], 1);
+                }
+            },
+            emptyBasket: function () {
+                this.basket = [];
             }
         },
         mounted: function () {

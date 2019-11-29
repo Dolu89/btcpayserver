@@ -4,34 +4,6 @@
     int[] CustomTipPercentages = Model.CustomTipPercentages;
 }
 
-<script id="template-cart-item" type="text/template">
-    <tr data-id="{id}">
-        {image}
-        <td class="align-middle pr-0 pl-2"><b>{title}</b></td>
-        <td class="align-middle px-0">
-            <a class="js-cart-item-remove btn btn-link" href="#"><i class="fa fa-trash text-muted"></i></a>
-        </td>
-        <td class="align-middle px-0">
-            <div class="input-group align-items-center">
-                <div class="input-group-prepend">
-                    <a class="js-cart-item-minus btn btn-link px-2" href="#"><i class="fa fa-minus-circle fa-fw text-danger"></i></a>
-                </div>
-                <input class="js-cart-item-count form-control form-control-sm pull-left" type="number" step="1" name="count" placeholder="Qty" max="{inventory}" value="{count}" data-prev="{count}">
-                <div class="input-group-append">
-                    <a class="js-cart-item-plus btn btn-link px-2" href="#">
-                        <i class="fa fa-plus-circle fa-fw text-success"></i>
-                    </a>
-                </div>
-            </div>
-        </td>
-        <td class="align-middle text-right">{price}</td>
-    </tr>
-</script>
-
-<script id="template-cart-item-image" type="text/template">
-    <td class="align-middle pr-0" width="1%"><img src="{image}" width="50"></td>
-</script>
-
 <script id="template-cart-custom-amount" type="text/template">
     <tr>
         <td colspan="5">
@@ -206,7 +178,7 @@
                     <a class="js-cart btn btn-lg btn-outline-primary" href="#">
                         <i class="fa fa-shopping-basket"></i>&nbsp;
                         <span class="badge badge-light badge-pill">
-                            <span id="js-cart-items">0</span>
+                            <span id="js-cart-items">{{basketCount}}</span>
                         </span>
                     </a>
                 </div>
@@ -229,7 +201,7 @@
         <div id="js-pos-list" class="text-center mx-auto px-4">
             <div class="row card-deck my-3">
 
-                <div class="js-add-cart card my-2 card-wrapper" :data-index="product.index" v-for="product in productsFiltered">
+                <div class="js-add-cart card my-2 card-wrapper" :data-index="product.index" v-for="product in productsFiltered" v-on:click="addToBasket(product)">
 
                     <img v-if="product.image !== null && product.image !== ' '" class="card-img-top" :src="product.image" alt="Card image cap">
 
@@ -257,7 +229,8 @@
             <a class="js-cart btn btn-sm bg-white text-black pull-right ml-5" href="#">
                 <i class="fa fa-times fa-lg"></i>
             </a>
-            <a class="js-cart-destroy btn btn-danger pull-right" href="#" style="display: none;">Empty cart <i class="fa fa-trash fa-fw fa-lg"></i></a>
+            <a class="js-cart-destroy btn btn-danger pull-right" href="#" v-if="basket.length > 0" v-on:click="emptyBasket()">Empty cart <i class="fa fa-trash fa-fw fa-lg"></i></a>
+
         </div>
 
         <table id="js-cart-list" class="table table-responsive table-light mt-0 mb-0">
@@ -272,14 +245,36 @@
                     </th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <tr :data-id="item.id" v-for="item in basketDisplay">
+                    <td class="align-middle pr-0" width="1%"><img :src="item.image" width="50"></td>
+                    <td class="align-middle pr-0 pl-2"><b>{{item.title}}</b></td>
+                    <td class="align-middle px-0">
+                        <a class="js-cart-item-remove btn btn-link" href="#" v-on:click="removeItemFromBasket(item.id)"><i class="fa fa-trash text-muted"></i></a>
+                    </td>
+                    <td class="align-middle px-0">
+                        <div class="input-group align-items-center">
+                            <div class="input-group-prepend" v-on:click="removeFromBasket(item)">
+                                <a class="js-cart-item-minus btn btn-link px-2" href="#"><i class="fa fa-minus-circle fa-fw text-danger"></i></a>
+                            </div>
+                            <input class="js-cart-item-count form-control form-control-sm pull-left" type="number" step="1" name="count" placeholder="Qty" :max="item.inventory" :value="item.qty" :data-prev="item.qty">
+                            <div class="input-group-append" v-on:click="addToBasket(item)">
+                                <a class="js-cart-item-plus btn btn-link px-2" href="#">
+                                    <i class="fa fa-plus-circle fa-fw text-success"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="align-middle text-right">{{item.price.formatted}}</td>
+                </tr>
+            </tbody>
         </table>
 
         <table id="js-cart-extra" class="table table-light mt-0 mb-0">
             <thead></thead>
         </table>
 
-        <button id="js-cart-confirm" data-toggle="modal" data-target="#cartModal" class="btn btn-primary btn-lg btn-block mb-3 p-3" disabled="disabled" type="submit">
+        <button id="js-cart-confirm" data-toggle="modal" data-target="#cartModal" class="btn btn-primary btn-lg btn-block mb-3 p-3" :disabled="basket.length === 0" type="submit">
             <b>Confirm</b>
         </button>
 
