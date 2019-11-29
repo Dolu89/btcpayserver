@@ -69,6 +69,7 @@
     {
         "outputFileName": "wwwroot/bundles/cart-bundle.min.js",
         "inputFiles": [
+            "wwwroot/vendor/vuejs/vue.min.js",
             "wwwroot/vendor/jquery/jquery.js",
             "wwwroot/main/bootstrap/bootstrap.js",
             "wwwroot/cart/js/cart.js",
