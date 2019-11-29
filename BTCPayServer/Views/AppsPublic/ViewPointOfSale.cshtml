@@ -3,218 +3,23 @@
 
 @model BTCPayServer.Models.AppViewModels.ViewPointOfSaleViewModel
 @{
-    ViewData["Title"] = Model.Title;
-    Layout = null;
-    int[] CustomTipPercentages = Model.CustomTipPercentages;
+    Layout = "AppsPublic/_PointOfSaleLayout";
 }
 
-<!DOCTYPE html>
-<html class="h-100">
-<head>
-    <title>@Model.Title</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-icon" href="~/img/icons/icon-512x512.png">
-    <link rel="apple-touch-startup-image" href="~/img/splash.png">
 
-    <link rel="manifest" href="~/manifest.json">
-
-    <link href="@this.Context.Request.GetRelativePathOrAbsolute(themeManager.BootstrapUri)" rel="stylesheet" />
-    <link href="@this.Context.Request.GetRelativePathOrAbsolute(themeManager.ThemeUri)" rel="stylesheet" />
-    @if (Model.CustomCSSLink != null)
-    {
-        <link href="@Model.CustomCSSLink" rel="stylesheet" />
-    }
-    <link href="~/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
-
-    @if (Context.Request.Query.ContainsKey("cart") || Model.DefaultView == "cart")
-    {
+@if (Context.Request.Query.ContainsKey("cart") || Model.DefaultView == "cart")
+{
+    @section scripts {
         <link rel="stylesheet" href="~/cart/css/style.css">
         <script type="text/javascript">
             var srvModel = @Safe.Json(Model);
         </script>
         <bundle name="wwwroot/bundles/cart-bundle.min.js" />
+
     }
-    <style>
-        .card-deck {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            grid-gap: .5rem;
-        }
-
-            .card-deck .card:only-of-type {
-                max-width: 320px;
-                margin: auto;
-            }
-
-        .js-cart-item-minus .fa,
-        .js-cart-item-plus .fa {
-            background: #fff;
-            border-radius: 50%;
-            width: 17px;
-            height: 17px;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .js-cart-item-count {
-            -moz-appearance: textfield;
-            margin: 0;
-            text-align: right;
-        }
-
-            .js-cart-item-count::-webkit-inner-spin-button,
-            .js-cart-item-count::-webkit-outer-spin-button {
-                -webkit-appearance: none;
-                -moz-appearance: none;
-                appearance: none;
-            }
-    </style>
-    @if (!string.IsNullOrEmpty(Model.EmbeddedCSS))
-    {
-        @Safe.Raw($"<style>{Model.EmbeddedCSS}</style>");
-    }
-
-</head>
-
-<body class="h-100">
-    <script id="template-cart-item" type="text/template">
-        <tr data-id="{id}">
-            {image}
-            <td class="align-middle pr-0 pl-2"><b>{title}</b></td>
-            <td class="align-middle px-0">
-                <a class="js-cart-item-remove btn btn-link" href="#"><i class="fa fa-trash text-muted"></i></a>
-            </td>
-            <td class="align-middle px-0">
-                <div class="input-group align-items-center">
-                    <div class="input-group-prepend">
-                        <a class="js-cart-item-minus btn btn-link px-2" href="#"><i class="fa fa-minus-circle fa-fw text-danger"></i></a>
-                    </div>
-                    <input class="js-cart-item-count form-control form-control-sm pull-left" type="number" step="1" name="count" placeholder="Qty" max="{inventory}" value="{count}" data-prev="{count}">
-                    <div class="input-group-append">
-                        <a class="js-cart-item-plus btn btn-link px-2" href="#">
-                            <i class="fa fa-plus-circle fa-fw text-success"></i>
-                        </a>
-                    </div>
-                </div>
-            </td>
-            <td class="align-middle text-right">{price}</td>
-        </tr>
-    </script>
-
-    <script id="template-cart-item-image" type="text/template">
-        <td class="align-middle pr-0" width="1%"><img src="{image}" width="50"></td>
-    </script>
-
-    <script id="template-cart-custom-amount" type="text/template">
-        <tr>
-            <td colspan="5">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fa fa-shopping-cart fa-fw"></i></span>
-                    </div>
-                    <input class="js-cart-custom-amount form-control" type="number" min="0" step="@Model.Step" name="amount" placeholder="Pay what you want">
-                    <div class="input-group-append">
-                        <a class="js-cart-custom-amount-remove btn btn-danger" href="#"><i class="fa fa-times"></i></a>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </script>
-
-    <script id="template-cart-extra" type="text/template">
-        @if (Model.ShowCustomAmount)
-        {
-            <tr>
-                <th colspan="5" class="border-0 pb-0">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"><i class="fa fa-shopping-cart fa-fw"></i></span>
-                        </div>
-                        <input class="js-cart-custom-amount form-control" type="number" min="0" step="@Model.Step" name="amount" value="{customAmount}" placeholder="Pay what you want">
-                        <div class="input-group-append">
-                            <a class="js-cart-custom-amount-remove btn btn-danger" href="#"><i class="fa fa-times"></i></a>
-                        </div>
-                    </div>
-                </th>
-            </tr>
-        }
-        @if (@Model.ShowDiscount)
-        {
-            <tr>
-                <th colspan="5" class="border-top-0">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"><i class="fa fa-percent fa-fw"></i></span>
-                        </div>
-                        <input class="js-cart-discount form-control" type="number" min="0" step="@Model.Step" value="{discount}" name="discount" placeholder="Discount in %">
-                        <div class="input-group-append">
-                            <a class="js-cart-discount-remove btn btn-danger" href="#"><i class="fa fa-times"></i></a>
-                        </div>
-                    </div>
-                </th>
-            </tr>
-        }
-    </script>
-
-    <script id="template-cart-tip" type="text/template">
-        @if (Model.EnableTips)
-        {
-            <tr>
-                <th colspan="5" class="border-top-0 pt-4 h5">@Model.CustomTipText</th>
-            </tr>
-            <tr>
-                <th colspan="5" class="border-0">
-                    <div class="input-group mb-2">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"><i class="fa fa-money fa-fw"></i></span>
-                        </div>
-                        <input class="js-cart-tip form-control form-control-lg" type="number" min="0" step="@Model.Step" value="{tip}" name="tip" placeholder="Tip in @(Model.CurrencyInfo.CurrencySymbol != null ? Model.CurrencyInfo.CurrencySymbol : Model.CurrencyCode)">
-                        <div class="input-group-append">
-                            <a class="js-cart-tip-remove btn btn-lg btn-danger" href="#"><i class="fa fa-times"></i></a>
-                        </div>
-                    </div>
-                    <div class="row mb-1">
-                        @if (CustomTipPercentages != null && CustomTipPercentages.Length > 0)
-                        {
-                            @for (int i = 0; i < CustomTipPercentages.Length; i++)
-                            {
-                                var percentage = CustomTipPercentages[i];
-                                <div class="col">
-                                    <a class="js-cart-tip-btn btn btn-lg btn-light btn-block border mb-2" href="#" data-tip="@percentage">@percentage%</a>
-                                </div>
-                            }
-                        }
-
-                    </div>
-                </th>
-            </tr>
-        }
-    </script>
-
-    <script id="template-cart-total" type="text/template">
-        <tr>
-            <th colspan="1" class="pb-4 h4">Total</th>
-            <th colspan="4" class="pb-4 h4 text-right">
-                <span class="js-cart-total">{total}</span>
-            </th>
-        </tr>
-    </script>
-    @if (this.TempData.HasStatusMessage())
-    {
-        <partial name="_StatusMessage" />
-    }
-
-    @if (Context.Request.Query.ContainsKey("cart") || Model.DefaultView == "cart")
-    {
-        @await Html.PartialAsync("/Views/AppsPublic/Pos/CartPointOfSale.cshtml", Model)
-    }
-    else if(Context.Request.Query.ContainsKey("static")  || Model.DefaultView == "static")
-    {
-        @await Html.PartialAsync("/Views/AppsPublic/Pos/StaticPointOfSale.cshtml", Model)
-    }
-
-</body>
-</html>
+    @await Html.PartialAsync("/Views/AppsPublic/Pos/CartPointOfSale.cshtml", Model)
+}
+else if (Context.Request.Query.ContainsKey("static") || Model.DefaultView == "static")
+{
+    @await Html.PartialAsync("/Views/AppsPublic/Pos/StaticPointOfSale.cshtml", Model)
+}
