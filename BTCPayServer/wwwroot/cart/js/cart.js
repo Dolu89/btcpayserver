@@ -35,7 +35,10 @@ addLoadEvent(function (ev) {
                 products: window.srvModel.items,
                 searchBar: '',
 
-                basket: []
+                basket: [],
+
+                customAmount: '',
+                discount: ''
             };
         },
         computed: {
@@ -68,6 +71,26 @@ addLoadEvent(function (ev) {
 
 
                 return basketDisplay;
+            },
+            total: function () {
+                var total = 0;
+
+                total += this.toCents(this.totalProducts);
+                total += this.toCents(this.customAmount);
+
+                total -= this.percentage(total, this.toCents(this.discount));
+
+                return total;
+            },
+            totalFormatted: function() {
+                return this.formatCurrency(this.fromCents(this.total));
+            },
+            totalProducts: function () {
+                var totalProducts = 0;
+                for (var i = 0; i < this.basketDisplay.length; i++) {
+                    totalProducts += this.basketDisplay[i].qty * this.basketDisplay[i].price.value;
+                }
+                return totalProducts;
             }
         },
         methods: {
@@ -96,12 +119,63 @@ addLoadEvent(function (ev) {
                         indexesToRemove.push(i);
                     }
                 }
-                for (var y = indexesToRemove.length -1; y >= 0; y--) {
+                for (var y = indexesToRemove.length - 1; y >= 0; y--) {
                     this.basket.splice(indexesToRemove[y], 1);
                 }
             },
             emptyBasket: function () {
                 this.basket = [];
+                this.discount = '';
+                this.customAmount = '';
+            },
+
+            toCents: function (num) {
+                return num * Math.pow(10, this.srvModel.currencyInfo.divisibility);
+            },
+            fromCents: function (num) {
+                return num / Math.pow(10, srvModel.currencyInfo.divisibility);
+            },
+            percentage: function (amount, percentage) {
+                return this.fromCents((amount / 100) * percentage);
+            },
+            formatCurrency: function (amount) {
+                var amt = '',
+                    thousandsSep = '',
+                    decimalSep = '',
+                    prefix = '',
+                    postfix = '';
+
+                if (this.srvModel.currencyInfo.prefixed) {
+                    prefix = this.srvModel.currencyInfo.currencySymbol;
+                    if (this.srvModel.currencyInfo.symbolSpace) {
+                        prefix = prefix + ' ';
+                    }
+
+                }
+                else {
+                    postfix = this.srvModel.currencyInfo.currencySymbol;
+                    if (this.srvModel.currencyInfo.symbolSpace) {
+                        postfix = ' ' + postfix;
+                    }
+
+                }
+                thousandsSep = this.srvModel.currencyInfo.thousandSeparator;
+                decimalSep = this.srvModel.currencyInfo.decimalSeparator;
+                amt = amount.toFixed(srvModel.currencyInfo.divisibility);
+
+                // Add currency sign and thousands separator
+                var splittedAmount = amt.split('.');
+                amt = (splittedAmount[0] + '.').replace(/(\d)(?=(\d{3})+\.)/g, '$1' + thousandsSep);
+                amt = amt.substr(0, amt.length - 1);
+                if (splittedAmount.length == 2) {
+                    amt = amt + decimalSep + splittedAmount[1];
+                }
+                if (this.srvModel.currencyInfo.divisibility !== 0) {
+                    amt[amt.length - this.srvModel.currencyInfo.divisibility - 1] = decimalSep;
+                }
+                amt = prefix + amt + postfix;
+
+                return amt;
             }
         },
         mounted: function () {

@@ -20,41 +20,6 @@
     </tr>
 </script>
 
-<script id="template-cart-extra" type="text/template">
-    @if (Model.ShowCustomAmount)
-    {
-        <tr>
-            <th colspan="5" class="border-0 pb-0">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fa fa-shopping-cart fa-fw"></i></span>
-                    </div>
-                    <input class="js-cart-custom-amount form-control" type="number" min="0" step="@Model.Step" name="amount" value="{customAmount}" placeholder="Pay what you want">
-                    <div class="input-group-append">
-                        <a class="js-cart-custom-amount-remove btn btn-danger" href="#"><i class="fa fa-times"></i></a>
-                    </div>
-                </div>
-            </th>
-        </tr>
-    }
-    @if (@Model.ShowDiscount)
-    {
-        <tr>
-            <th colspan="5" class="border-top-0">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fa fa-percent fa-fw"></i></span>
-                    </div>
-                    <input class="js-cart-discount form-control" type="number" min="0" step="@Model.Step" value="{discount}" name="discount" placeholder="Discount in %">
-                    <div class="input-group-append">
-                        <a class="js-cart-discount-remove btn btn-danger" href="#"><i class="fa fa-times"></i></a>
-                    </div>
-                </div>
-            </th>
-        </tr>
-    }
-</script>
-
 <script id="template-cart-tip" type="text/template">
     @if (Model.EnableTips)
     {
@@ -91,12 +56,7 @@
 </script>
 
 <script id="template-cart-total" type="text/template">
-    <tr>
-        <th colspan="1" class="pb-4 h4">Total</th>
-        <th colspan="4" class="pb-4 h4 text-right">
-            <span class="js-cart-total">{total}</span>
-        </th>
-    </tr>
+    
 </script>
 
 
@@ -229,7 +189,7 @@
             <a class="js-cart btn btn-sm bg-white text-black pull-right ml-5" href="#">
                 <i class="fa fa-times fa-lg"></i>
             </a>
-            <a class="js-cart-destroy btn btn-danger pull-right" href="#" v-if="basket.length > 0" v-on:click="emptyBasket()">Empty cart <i class="fa fa-trash fa-fw fa-lg"></i></a>
+            <a class="js-cart-destroy btn btn-danger pull-right" href="#" v-if="total > 0" v-on:click="emptyBasket()">Empty cart <i class="fa fa-trash fa-fw fa-lg"></i></a>
 
         </div>
 
@@ -271,10 +231,49 @@
         </table>
 
         <table id="js-cart-extra" class="table table-light mt-0 mb-0">
-            <thead></thead>
+            <thead>
+                @if (Model.ShowCustomAmount)
+                {
+                    <tr>
+                        <th colspan="5" class="border-0 pb-0">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fa fa-shopping-cart fa-fw"></i></span>
+                                </div>
+                                <input class="js-cart-custom-amount form-control" type="number" min="0" step="@Model.Step" name="amount" v-model="customAmount" placeholder="Pay what you want">
+                                <div class="input-group-append">
+                                    <a class="js-cart-custom-amount-remove btn btn-danger" href="#" v-on:click="customAmount = ''"><i class="fa fa-times"></i></a>
+                                </div>
+                            </div>
+                        </th>
+                    </tr>
+                }
+                @if (@Model.ShowDiscount)
+                {
+                    <tr>
+                        <th colspan="5" class="border-top-0">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fa fa-percent fa-fw"></i></span>
+                                </div>
+                                <input class="js-cart-discount form-control" type="number" min="0" step="@Model.Step" v-model="discount" name="discount" placeholder="Discount in %">
+                                <div class="input-group-append">
+                                    <a class="js-cart-discount-remove btn btn-danger" href="#" v-on:click="discount = ''"><i class="fa fa-times"></i></a>
+                                </div>
+                            </div>
+                        </th>
+                    </tr>
+                }
+                <tr>
+                    <th colspan="1" class="pb-4 h4">Total</th>
+                    <th colspan="4" class="pb-4 h4 text-right">
+                        <span class="js-cart-total">{{totalFormatted}}</span>
+                    </th>
+                </tr>
+            </thead>
         </table>
 
-        <button id="js-cart-confirm" data-toggle="modal" data-target="#cartModal" class="btn btn-primary btn-lg btn-block mb-3 p-3" :disabled="basket.length === 0" type="submit">
+        <button id="js-cart-confirm" data-toggle="modal" data-target="#cartModal" class="btn btn-primary btn-lg btn-block mb-3 p-3" :disabled="total === 0" type="submit">
             <b>Confirm</b>
         </button>
 
