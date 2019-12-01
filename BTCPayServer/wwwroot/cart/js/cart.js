@@ -38,7 +38,8 @@ addLoadEvent(function (ev) {
                 basket: [],
 
                 customAmount: '',
-                discount: ''
+                discount: '',
+                tip: '',
             };
         },
         computed: {
@@ -72,25 +73,59 @@ addLoadEvent(function (ev) {
 
                 return basketDisplay;
             },
-            total: function () {
-                var total = 0;
-
-                total += this.toCents(this.totalProducts);
-                total += this.toCents(this.customAmount);
-
-                total -= this.percentage(total, this.toCents(this.discount));
-
-                return total;
-            },
-            totalFormatted: function() {
-                return this.formatCurrency(this.fromCents(this.total));
-            },
             totalProducts: function () {
                 var totalProducts = 0;
                 for (var i = 0; i < this.basketDisplay.length; i++) {
                     totalProducts += this.basketDisplay[i].qty * this.basketDisplay[i].price.value;
                 }
                 return totalProducts;
+            },
+            totalProductsCustomAmount: function () {
+                return this.totalProducts + this.toNumber(this.customAmount);
+            },
+            totalProductsFormatted: function () {
+                return this.formatCurrency(this.totalProductsCustomAmount);
+            },
+            totalBasket: function () {
+                var total = 0;
+
+                //Add products prices
+                total += this.toCents(this.totalProducts);
+                //Add custom price
+                total += this.toCents(this.customAmount);
+
+                //Add discount
+                total -= this.percentage(total, this.toCents(this.toNumber(this.discount)));
+
+                return total;
+            },
+            totalBasketFormatted: function () {
+                return this.formatCurrency(this.fromCents(this.totalBasket));
+            },
+            total: function () {
+                var total = 0;
+
+                //Add calculated totalBasket
+                total += this.toNumber(this.totalBasket);
+                //Add tip
+                total += this.toCents(this.tip);
+
+                return total;
+            },
+            totalFormatted: function () {
+                return this.formatCurrency(this.fromCents(this.total));
+            },
+            discountFormatted: function () {
+                var discount = this.percentage(this.totalProductsCustomAmount, this.toCents(this.discount));
+                if (discount > 0) {
+                    return '-' + this.formatCurrency(discount);
+                }
+                else {
+                    return this.formatCurrency(discount);
+                }
+            },
+            tipFormatted: function () {
+                return this.formatCurrency(this.toNumber(this.tip));
             }
         },
         methods: {
@@ -138,6 +173,9 @@ addLoadEvent(function (ev) {
             percentage: function (amount, percentage) {
                 return this.fromCents((amount / 100) * percentage);
             },
+            toNumber: function (num) {
+                return (num * 1) || 0;
+            },
             formatCurrency: function (amount) {
                 var amt = '',
                     thousandsSep = '',
@@ -176,6 +214,9 @@ addLoadEvent(function (ev) {
                 amt = prefix + amt + postfix;
 
                 return amt;
+            },
+            setTipPercent(percentage) {
+                this.tip = this.fromCents(Math.round(percentage * this.totalBasket / 100));
             }
         },
         mounted: function () {

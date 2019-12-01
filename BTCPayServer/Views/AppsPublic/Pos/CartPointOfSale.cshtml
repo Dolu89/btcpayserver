@@ -21,113 +21,11 @@
 </script>
 
 <script id="template-cart-tip" type="text/template">
-    @if (Model.EnableTips)
-    {
-        <tr>
-            <th colspan="5" class="border-top-0 pt-4 h5">@Model.CustomTipText</th>
-        </tr>
-        <tr>
-            <th colspan="5" class="border-0">
-                <div class="input-group mb-2">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fa fa-money fa-fw"></i></span>
-                    </div>
-                    <input class="js-cart-tip form-control form-control-lg" type="number" min="0" step="@Model.Step" value="{tip}" name="tip" placeholder="Tip in @(Model.CurrencyInfo.CurrencySymbol != null ? Model.CurrencyInfo.CurrencySymbol : Model.CurrencyCode)">
-                    <div class="input-group-append">
-                        <a class="js-cart-tip-remove btn btn-lg btn-danger" href="#"><i class="fa fa-times"></i></a>
-                    </div>
-                </div>
-                <div class="row mb-1">
-                    @if (CustomTipPercentages != null && CustomTipPercentages.Length > 0)
-                    {
-                        @for (int i = 0; i < CustomTipPercentages.Length; i++)
-                        {
-                            var percentage = CustomTipPercentages[i];
-                            <div class="col">
-                                <a class="js-cart-tip-btn btn btn-lg btn-light btn-block border mb-2" href="#" data-tip="@percentage">@percentage%</a>
-                            </div>
-                        }
-                    }
 
-                </div>
-            </th>
-        </tr>
-    }
-</script>
-
-<script id="template-cart-total" type="text/template">
-    
 </script>
 
 
-<div id="cartModal" class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white border-0">
-                <h5 class="modal-title">Confirmation</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">
-                        <i class="fa fa-times fa-fw"></i>
-                    </span>
-                </button>
-            </div>
-            <div class="modal-body p-0">
-                <table id="js-cart-summary" class="table m-0">
-                    <tbody class="my-3">
-                        <tr>
-                            <td colspan="2" class="border-top-0 h5">Summary</td>
-                        </tr>
-                        <tr>
-                            <td class="border-0 pb-0 h6">Total products</td>
-                            <td align="right" class="border-0 pb-0 h6">
-                                <span class="js-cart-summary-products text-nowrap"></span>
-                            </td>
-                        </tr>
-                        @if (Model.ShowDiscount)
-                        {
-                            <tr>
-                                <td class="border-0 pb-y h6">Discount</td>
-                                <td align="right" class="border-0 pb-y h6">
-                                    <span class="js-cart-summary-discount text-nowrap"></span>
-                                </td>
-                            </tr>
-                        }
-                        @if (Model.EnableTips)
-                        {
-                            <tr>
-                                <td class="border-top-0 pt-0 h6">Tip</td>
-                                <td align="right" class="border-top-0 pt-0 h6">
-                                    <span class="js-cart-summary-tip text-nowrap"></span>
-                                </td>
-                            </tr>
-                        }
-                        <tr>
-                            <td class="h3 table-light">Total</td>
-                            <td class="h3 table-light text-right">
-                                <span class="js-cart-summary-total text-nowrap"></span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer bg-light">
-                <form id="js-cart-pay-form"
-                      method="post"
-                      asp-controller="AppsPublic"
-                      asp-action="ViewPointOfSale"
-                      asp-route-appId="@Model.AppId"
-                      asp-antiforgery="false"
-                      data-buy>
-                    <input id="js-cart-amount" class="form-control" type="hidden" name="amount">
-                    <input id="js-cart-posdata" class="form-control" type="hidden" name="posdata">
-                    <button id="js-cart-pay" class="btn btn-primary btn-lg" type="submit">
-                        <b>@Model.CustomButtonText</b>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <div class="wrapper" id="app" v-cloak>
     <!-- Page Content  -->
@@ -189,7 +87,7 @@
             <a class="js-cart btn btn-sm bg-white text-black pull-right ml-5" href="#">
                 <i class="fa fa-times fa-lg"></i>
             </a>
-            <a class="js-cart-destroy btn btn-danger pull-right" href="#" v-if="total > 0" v-on:click="emptyBasket()">Empty cart <i class="fa fa-trash fa-fw fa-lg"></i></a>
+            <a class="js-cart-destroy btn btn-danger pull-right" href="#" v-if="totalBasket > 0" v-on:click="emptyBasket()">Empty cart <i class="fa fa-trash fa-fw fa-lg"></i></a>
 
         </div>
 
@@ -267,13 +165,13 @@
                 <tr>
                     <th colspan="1" class="pb-4 h4">Total</th>
                     <th colspan="4" class="pb-4 h4 text-right">
-                        <span class="js-cart-total">{{totalFormatted}}</span>
+                        <span class="js-cart-total">{{totalBasketFormatted}}</span>
                     </th>
                 </tr>
             </thead>
         </table>
 
-        <button id="js-cart-confirm" data-toggle="modal" data-target="#cartModal" class="btn btn-primary btn-lg btn-block mb-3 p-3" :disabled="total === 0" type="submit">
+        <button id="js-cart-confirm" data-toggle="modal" data-target="#cartModal" class="btn btn-primary btn-lg btn-block mb-3 p-3" :disabled="totalBasket === 0" type="submit">
             <b>Confirm</b>
         </button>
 
@@ -281,4 +179,105 @@
             <img src="~/img/logo.svg" class="logo" height="40">
         </div>
     </nav>
+
+    <div id="cartModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title">Confirmation</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">
+                            <i class="fa fa-times fa-fw"></i>
+                        </span>
+                    </button>
+                </div>
+                <div class="modal-body p-0">
+                    <table id="js-cart-summary" class="table m-0">
+                        <tbody class="my-3">
+                            @if (Model.EnableTips)
+                            {
+                                <tr>
+                                    <th colspan="5" class="border-top-0 pt-4 h5">@Model.CustomTipText</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="5" class="border-0">
+                                        <div class="input-group mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fa fa-money fa-fw"></i></span>
+                                            </div>
+                                            <input class="js-cart-tip form-control form-control-lg" type="number" min="0" step="@Model.Step" v-model="tip" name="tip" placeholder="Tip in @(Model.CurrencyInfo.CurrencySymbol != null ? Model.CurrencyInfo.CurrencySymbol : Model.CurrencyCode)">
+                                            <div class="input-group-append">
+                                                <a class="js-cart-tip-remove btn btn-lg btn-danger" href="#" v-on:click="tip = ''"><i class="fa fa-times"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-1">
+                                            @if (CustomTipPercentages != null && CustomTipPercentages.Length > 0)
+                                            {
+                                                @for (int i = 0; i < CustomTipPercentages.Length; i++)
+                                                {
+                                                    var percentage = CustomTipPercentages[i];
+                                                    <div class="col">
+                                                        <a class="js-cart-tip-btn btn btn-lg btn-light btn-block border mb-2" href="#" v-on:click="setTipPercent(@percentage)" data-tip="@percentage">@percentage%</a>
+                                                    </div>
+                                                }
+                                            }
+
+                                        </div>
+                                    </th>
+                                </tr>
+                            }
+                            <tr>
+                                <td colspan="2" class="border-top-0 h5">Summary</td>
+                            </tr>
+                            <tr>
+                                <td class="border-0 pb-0 h6">Total products</td>
+                                <td align="right" class="border-0 pb-0 h6">
+                                    <span class="js-cart-summary-products text-nowrap">{{totalProductsFormatted}}</span>
+                                </td>
+                            </tr>
+                            @if (Model.ShowDiscount)
+                            {
+                                <tr>
+                                    <td class="border-0 pb-y h6">Discount</td>
+                                    <td align="right" class="border-0 pb-y h6">
+                                        <span class="js-cart-summary-discount text-nowrap">{{discountFormatted}}</span>
+                                    </td>
+                                </tr>
+                            }
+                            @if (Model.EnableTips)
+                            {
+                                <tr>
+                                    <td class="border-top-0 pt-0 h6">Tip</td>
+                                    <td align="right" class="border-top-0 pt-0 h6">
+                                        <span class="js-cart-summary-tip text-nowrap">{{tipFormatted}}</span>
+                                    </td>
+                                </tr>
+                            }
+                            <tr>
+                                <td class="h3 table-light">Total</td>
+                                <td class="h3 table-light text-right">
+                                    <span class="js-cart-summary-total text-nowrap">{{totalFormatted}}</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer bg-light">
+                    <form id="js-cart-pay-form"
+                          method="post"
+                          asp-controller="AppsPublic"
+                          asp-action="ViewPointOfSale"
+                          asp-route-appId="@Model.AppId"
+                          asp-antiforgery="false"
+                          data-buy>
+                        <input id="js-cart-amount" class="form-control" type="hidden" name="amount">
+                        <input id="js-cart-posdata" class="form-control" type="hidden" name="posdata">
+                        <button id="js-cart-pay" class="btn btn-primary btn-lg" type="submit">
+                            <b>@Model.CustomButtonText</b>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
